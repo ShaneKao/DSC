@@ -1,0 +1,133 @@
+---
+title: "Milestone Report Submission"
+author: "Shane Kao"
+date: "Monday, February 16, 2015"
+output: html_document
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+library(ggplot2)
+library(gridExtra)
+library(tm)
+library(slam)
+library(reshape2)
+library(RWeka)
+```
+
+# Download Data and Import Data
+
+First of all, we demonstrate that how downloaded the data and successfully loaded it in R as character vector.
+
+```{r  warning=FALSE}
+setwd("C:/Users/asus/Downloads")
+destination_file <- "Coursera-SwiftKey.zip"
+source_file <- "http://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip"
+if(!destination_file%in%list.files(getwd())){
+        download.file(source_file, destination_file)
+        unzip(destination_file, list = TRUE )
+}
+list.files("final")
+setwd("final/en_US")
+file.info(list.files())[c("en_US.blogs.txt","en_US.twitter.txt","en_US.news.txt"),]
+twitter=readLines("en_US.twitter.txt",encoding="UTF-8")
+summary(twitter)
+blogs=readLines("en_US.blogs.txt",encoding="UTF-8")
+summary(blogs)
+news=readLines("en_US.news.txt",encoding="UTF-8")
+summary(news)
+```
+
+# Basic Statistics
+
+First of all, we count the words per item (line) and summarise the distibution of these three files.
+
+```{r}
+summary(nchar(twitter,allowNA=TRUE))
+summary(nchar(blogs,allowNA=TRUE))
+summary(nchar(news,allowNA=TRUE))
+```
+
+```{r , message=FALSE,echo=FALSE}
+grid.arrange(qplot(nchar(twitter,allowNA=TRUE),xlab="line length",main='en_US.twitter.txt'),
+             qplot(nchar(blogs,allowNA=TRUE),xlab="line length",main='en_US.blogs.txt',xlim=c(0,quantile(nchar(blogs,allowNA=TRUE),0.99,na.rm=TRUE))),
+             qplot(nchar(news,allowNA=TRUE),xlab="line length",main='en_US.news.txt',xlim=c(0,quantile(nchar(news,allowNA=TRUE),0.99,na.rm=TRUE))),
+             ncol = 1)
+```
+
+# Data Preprpocessing
+
+* Remove lines containing invalid multibyte
+
+* Remove lines containing numbers
+
+* Translate words to lower case
+
+* Remove profanity 
+
+* Remove punctuation
+
+
+```{r}
+clean_data=function(x){
+        x<-x[!is.na(nchar(x,allowNA=TRUE))]
+        x<-x[grep("[0-9]",x,invert=TRUE)]
+        x<-apply(cbind(x),1,tolower)
+        x<-x[grep("fuck|shit|ass|suck|dick",x,invert=TRUE)]
+        x<-gsub("[^a-z\ ]","",x)
+        write.table(x,paste0(x,"_clean.txt"),row.names=FALSE,col.names=FALSE)
+}
+```
+
+# The frequencies of n-grams 
+
+```{r echo=FALSE}
+twitter_clean=readLines("twitter_clean.txt")
+blogs_clean=readLines("blogs_clean.txt")
+news_clean=readLines("news_clean.txt")
+mycorpus=Corpus(VectorSource(c(blogs_clean,twitter_clean,news_clean)))
+```
+
+## Top 10 of 1-grams
+
+```{r echo=FALSE results="hide"}
+TDM <- TermDocumentMatrix(mycorpus)
+termfreq <- rollup(TDM, 2, na.rm=TRUE, FUN = sum)
+TDM_freq=inspect(termfreq)
+TDM_dense = melt(TDM_freq, value.name = "count")
+```
+
+```{r}
+head(TDM_dense[order(TDM_dense$count,decreasing=TRUE),c("Terms","count")],10)
+```
+
+## Top 10 of 2-grams
+
+```{r echo=FALSE results="hide"}
+BigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 2, max = 2))
+TDM_bigram <- TermDocumentMatrix(mycorpus, control = list(tokenize = BigramTokenizer))
+termfreq <- rollup(TDM_bigram , 2, na.rm=TRUE, FUN = sum)
+TDM_bigram_freq=inspect(termfreq)
+TDM_bigram_dense = melt(TDM_bigram_freq, value.name = "count")
+```
+
+```{r}
+head(TDM_bigram_dense[order(TDM_bigram_dense$count,decreasing=TRUE),c("Terms","count")],10)
+```
+
+## Top 10 of 3-grams
+
+```{r echo=FALSE results="hide"}
+TrigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 3, max = 3))
+TDM_trigram <- TermDocumentMatrix(mycorpus, control = list(tokenize = TrigramTokenizer))
+termfreq <- rollup(TDM_trigram , 2, na.rm=TRUE, FUN = sum)
+TDM_trigram_freq=inspect(termfreq)
+TDM_trigram_dense = melt(TDM_trigram_freq, value.name = "count")
+```
+
+```{r}
+head(TDM_trigram_dense[order(TDM_trigram_dense$count,decreasing=TRUE),c("Terms","count")],10)
+```
+
+# Discussion
+
+I'm suffering by the slowness of `tm` package, so I use subset of each files to investigate the frequencies of n-grams, and we can use these frequency n-grams to test the model, because it seems like people use these words or phrase more often, we want the model has good performance to predict the next word.

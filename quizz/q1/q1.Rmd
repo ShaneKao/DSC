@@ -1,0 +1,65 @@
+---
+title: "Data Science Capstone - Quiz 1"
+author: "Shane Kao"
+date: "Sunday, February 15, 2015"
+output: pdf_document
+---
+
+```{r warning=FALSE}
+setwd("C:/Users/asus/Downloads/final/en_US")
+twitter=readLines("en_US.twitter.txt")
+blogs=readLines("en_US.blogs.txt")
+news=readLines("en_US.news.txt")
+```
+
+# Question 1
+
+The `en_US_blogs.txt` file is how many megabytes?
+
+```{r}
+file.info(list.files(pattern="*.txt"))
+file.info(list.files(pattern="*.txt"))["en_US.blogs.txt","size"]/1024/1024
+```
+
+# Question 2
+
+The `en_US.twitter.txt` has how many lines of text?
+
+```{r warning=FALSE}
+length(twitter)
+```
+
+# Question 3
+
+What is the length of the longest line seen in any of the three en_US data sets?
+
+```{r warning=FALSE}
+summary(nchar(twitter,allowNA = TRUE))
+summary(nchar(blogs,allowNA = TRUE))
+summary(nchar(news,allowNA = TRUE))
+```
+
+# Question 4
+
+In the en_US twitter data set, if you divide the number of lines where the word "love" (all lowercase) occurs by the number of lines the word "hate" (all lowercase) occurs, about what do you get?
+
+```{r warning=FALSE}
+length(grep("love",twitter))/length(grep("hate",twitter))
+```
+
+# Question 5
+
+The one tweet in the en_US twitter data set that matches the word "biostats" says what?
+
+```{r warning=FALSE}
+twitter[grep("biostats",twitter)]
+```
+
+# Question 6
+
+How many tweets have the exact characters "A computer once beat me at chess, but it was no match for me at kickboxing". (I.e. the line matches those characters exactly.)
+
+```{r warning=FALSE}
+text="A computer once beat me at chess, but it was no match for me at kickboxing"
+length(twitter[grep(text,twitter)])
+```
