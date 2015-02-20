@@ -2,7 +2,7 @@
 title: "Milestone Report Submission"
 author: "Shane Kao"
 date: "Monday, February 16, 2015"
-output: html_document
+output: pdf_document
 ---
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
@@ -47,7 +47,7 @@ summary(nchar(blogs,allowNA=TRUE))
 summary(nchar(news,allowNA=TRUE))
 ```
 
-```{r , message=FALSE,echo=FALSE}
+```{r , message=FALSE, echo=FALSE}
 grid.arrange(qplot(nchar(twitter,allowNA=TRUE),xlab="line length",main='en_US.twitter.txt'),
              qplot(nchar(blogs,allowNA=TRUE),xlab="line length",main='en_US.blogs.txt',xlim=c(0,quantile(nchar(blogs,allowNA=TRUE),0.99,na.rm=TRUE))),
              qplot(nchar(news,allowNA=TRUE),xlab="line length",main='en_US.news.txt',xlim=c(0,quantile(nchar(news,allowNA=TRUE),0.99,na.rm=TRUE))),
@@ -89,7 +89,7 @@ mycorpus=Corpus(VectorSource(c(blogs_clean,twitter_clean,news_clean)))
 
 ## Top 10 of 1-grams
 
-```{r echo=FALSE results="hide"}
+```{r echo=FALSE, results="hide"}
 TDM <- TermDocumentMatrix(mycorpus)
 termfreq <- rollup(TDM, 2, na.rm=TRUE, FUN = sum)
 TDM_freq=inspect(termfreq)
@@ -102,7 +102,7 @@ head(TDM_dense[order(TDM_dense$count,decreasing=TRUE),c("Terms","count")],10)
 
 ## Top 10 of 2-grams
 
-```{r echo=FALSE results="hide"}
+```{r echo=FALSE,results="hide"}
 BigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 2, max = 2))
 TDM_bigram <- TermDocumentMatrix(mycorpus, control = list(tokenize = BigramTokenizer))
 termfreq <- rollup(TDM_bigram , 2, na.rm=TRUE, FUN = sum)
@@ -116,7 +116,7 @@ head(TDM_bigram_dense[order(TDM_bigram_dense$count,decreasing=TRUE),c("Terms","c
 
 ## Top 10 of 3-grams
 
-```{r echo=FALSE results="hide"}
+```{r echo=FALSE,results="hide"}
 TrigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 3, max = 3))
 TDM_trigram <- TermDocumentMatrix(mycorpus, control = list(tokenize = TrigramTokenizer))
 termfreq <- rollup(TDM_trigram , 2, na.rm=TRUE, FUN = sum)
