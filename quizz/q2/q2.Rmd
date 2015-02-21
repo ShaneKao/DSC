@@ -1,0 +1,194 @@
+---
+title: "Natural language processing Quiz 1"
+author: "Shane Kao"
+date: "Saturday, February 21, 2015"
+output: pdf_document
+---
+
+```{r warning=FALSE}
+setwd("C:/Users/asus/Downloads/final/en_US")
+twitter=readLines("en_US.twitter.txt")
+blogs=readLines("en_US.blogs.txt")
+news=readLines("en_US.news.txt")
+data=c(twitter,blogs,news)
+```
+
+# Question 1
+
+The guy in front of me just bought a pound of bacon, a bouquet, and a case of
+
+```{r warning=FALSE}
+x="a case of"
+data_v1=data[grep(x,data)]
+n=length(data_v1)
+pred=function(y){       
+        data_v2=data_v1[grep(paste(x,y,sep=" "),data_v1)]
+        length(data_v2)/n
+}
+candidate=c("soda","pretzels","cheese","beer")
+prob=apply(cbind(candidate),1,pred)
+output=data.frame("candidate"=candidate,"probability"=prob)
+output[order(output$probability,decreasing=TRUE),]
+```
+
+# Question 2
+
+You're the reason why I smile everyday. Can you follow me please? It would mean the
+
+```{r warning=FALSE, echo=FALSE}
+x="mean the"
+data_v1=data[grep(x,data)]
+n=length(data_v1)
+pred=function(y){       
+        data_v2=data_v1[grep(paste(x,y,sep=" "),data_v1)]
+        length(data_v2)/n
+}
+candidate=c("world","most","universe","best")
+prob=apply(cbind(candidate),1,pred)
+output=data.frame("candidate"=candidate,"probability"=prob)
+output[order(output$probability,decreasing=TRUE),]
+```
+
+# Question 3
+
+Hey sunshine, can you follow me and make me the
+
+```{r warning=FALSE, echo=FALSE}
+x="make me the"
+data_v1=data[grep(x,data)]
+n=length(data_v1)
+pred=function(y){       
+        data_v2=data_v1[grep(paste(x,y,sep=" "),data_v1)]
+        length(data_v2)/n
+}
+candidate=c("happiest","bluest","saddest","smelliest")
+prob=apply(cbind(candidate),1,pred)
+output=data.frame("candidate"=candidate,"probability"=prob)
+output[order(output$probability,decreasing=TRUE),]
+```
+
+# Question 4
+
+Very early observations on the Bills game: Offense still struggling but the
+
+```{r warning=FALSE, echo=FALSE}
+x="but the"
+data_v1=data[grep(x,data)]
+n=length(data_v1)
+pred=function(y){       
+        data_v2=data_v1[grep(paste(x,y,sep=" "),data_v1)]
+        length(data_v2)/n
+}
+candidate=c("defense","crowd","referees","players")
+prob=apply(cbind(candidate),1,pred)
+output=data.frame("candidate"=candidate,"probability"=prob)
+output[order(output$probability,decreasing=TRUE),]
+```
+
+# Question 5
+
+Go on a romantic date at the
+
+```{r warning=FALSE, echo=FALSE}
+x="at the"
+data_v1=data[grep(x,data)]
+n=length(data_v1)
+pred=function(y){       
+        data_v2=data_v1[grep(paste(x,y,sep=" "),data_v1)]
+        length(data_v2)/n
+}
+candidate=c("mall","grocery","movies","beach")
+prob=apply(cbind(candidate),1,pred)
+output=data.frame("candidate"=candidate,"probability"=prob)
+output[order(output$probability,decreasing=TRUE),]
+```
+
+# Question 6
+
+Well I'm pretty sure my granny has some old bagpipes in her garage I'll dust them off and be on my
+
+```{r warning=FALSE, echo=FALSE}
+x="be on my"
+data_v1=data[grep(x,data)]
+n=length(data_v1)
+pred=function(y){       
+        data_v2=data_v1[grep(paste(x,y,sep=" "),data_v1)]
+        length(data_v2)/n
+}
+candidate=c("phone","motorcycle","way","horse")
+prob=apply(cbind(candidate),1,pred)
+output=data.frame("candidate"=candidate,"probability"=prob)
+output[order(output$probability,decreasing=TRUE),]
+```
+
+# Question 7
+
+Ohhhhh #PointBreak is on tomorrow. Love that film and haven't seen it in quite some
+
+```{r warning=FALSE, echo=FALSE}
+x="quite some"
+data_v1=data[grep(x,data)]
+n=length(data_v1)
+pred=function(y){       
+        data_v2=data_v1[grep(paste(x,y,sep=" "),data_v1)]
+        length(data_v2)/n
+}
+candidate=c("thing","weeks","time","years")
+prob=apply(cbind(candidate),1,pred)
+output=data.frame("candidate"=candidate,"probability"=prob)
+output[order(output$probability,decreasing=TRUE),]
+```
+
+# Question 8
+
+After the ice bucket challenge Louis will push his long wet hair out of his eyes with his little
+
+```{r warning=FALSE, echo=FALSE}
+x="his little"
+data_v1=data[grep(x,data)]
+n=length(data_v1)
+pred=function(y){       
+        data_v2=data_v1[grep(paste(x,y,sep=" "),data_v1)]
+        length(data_v2)/n
+}
+candidate=c("eyes","ears","fingers","toes")
+prob=apply(cbind(candidate),1,pred)
+output=data.frame("candidate"=candidate,"probability"=prob)
+output[order(output$probability,decreasing=TRUE),]
+```
+
+# Question 9
+
+Be grateful for the good times and keep the faith during the
+
+```{r warning=FALSE, echo=FALSE}
+x="during the"
+data_v1=data[grep(x,data)]
+n=length(data_v1)
+pred=function(y){       
+        data_v2=data_v1[grep(paste(x,y,sep=" "),data_v1)]
+        length(data_v2)/n
+}
+candidate=c("sad","hard","worse","bad")
+prob=apply(cbind(candidate),1,pred)
+output=data.frame("candidate"=candidate,"probability"=prob)
+output[order(output$probability,decreasing=TRUE),]
+```
+
+# Question 10
+
+If this isn't the cutest thing you've ever seen, then you must be
+
+```{r warning=FALSE, echo=FALSE}
+x="must be"
+data_v1=data[grep(x,data)]
+n=length(data_v1)
+pred=function(y){       
+        data_v2=data_v1[grep(paste(x,y,sep=" "),data_v1)]
+        length(data_v2)/n
+}
+candidate=c("asleep","insensitive","insane","callous")
+prob=apply(cbind(candidate),1,pred)
+output=data.frame("candidate"=candidate,"probability"=prob)
+output[order(output$probability,decreasing=TRUE),]
+```
