@@ -1,0 +1,144 @@
+---
+title: "Reproducible Report Submission"
+author: "Shane Kao"
+date: "Sunday, February 22, 2015"
+output: pdf_document
+---
+
+# Conditional Probability
+
+I use very simple concept, condition probability, to complete the predictive model. For example,  if user input "a lot of", then the probability of the next word is "people" is
+
+$$P(next~word~is~people|a~lot~of)=\frac{P(a~lot~of~people)}{P(a~lot~of)}$$
+
+The equation gives us 3-gram example, can be apply to $n$-gram, and it can implement easily in R as follows:
+
+```{r warning=FALSE}
+setwd("C:/Users/asus/Downloads/final/en_US")
+news=readLines("news_clean.txt",n=100000)
+length(grep("a lot of people",news))/length(grep("a lot of .",news))
+```
+
+In general, we want to output the most likely outcome, such as 10 highest probability words    
+
+```{r warning=FALSE}
+x=news[grep("a lot of .",news)]
+word=c()
+for(i in 1:length(x)){
+        word=append(word,strsplit(strsplit(x[i],"a lot of ")[[1]][2]," ")[[1]][1])
+}
+word<-gsub("\"","",word)
+output=as.data.frame(table(word)) 
+output$probability<-output$Freq/length(x)
+head(output[order(output$probability,decreasing=TRUE),c("word","probability")],10)
+```
+
+# Model Fitting
+
+In order to make the model smaller and more efficient, we drop lines doesn't contain [the top ten frequencies 3-grams](https://github.com/ShaneKao/DSC/blob/master/Milestone%20Report%20Submission/Milestone_Report_Submission.pdf?raw=true). Randomly assign 60% of data to training set, 20% to test set and 20% to validation set.
+
+```{r echo=FALSE}
+data=readLines("model_data.txt")
+index=1:length(data)
+train_index=sample(index,length(data)*0.6)
+test_index=sample(index[-train_index],(length(data)-length(train_index))/2)
+validation_index=index[-c(train_index,test_index)]
+train_data=data[train_index]
+test_data=data[test_index]
+validation_data=data[validation_index]
+```
+
+## Training Set
+
+This data set is used to fit the original model.
+
+```{r}
+pred=function(input,n){
+        input<-tolower(input)
+        input<-gsub("[^0-9a-z\ ]","",input)
+        pattern=paste(paste(rev(rev(strsplit(input," ")[[1]])[1:n]),collapse = " "),".",sep=" ")
+        x=train_data[grep(pattern,train_data)]
+        if(length(x)!=0){
+                word=c()
+                for(i in 1:length(x)){
+                        seg=paste0(paste(rev(rev(strsplit(input," ")[[1]])[1:n]),collapse = " ")," ")
+                        word=append(word,strsplit(strsplit(x[i],seg)[[1]][2]," ")[[1]][1])                   
+                }
+                word<-gsub("\"","",word)
+                output=as.data.frame(table(word)) 
+                output$probability<-output$Freq/length(x)
+                head(output[order(output$probability,decreasing=TRUE),c("word","probability")],10)
+        }else{
+                data.frame("word"="","probability"="")
+             }
+}
+```
+
+For example, if user input "I am afraid I won't be able to" and use 3-gram, then the output is
+
+```{r}
+pred("I am afraid I won't be able to",3)
+```
+
+In some cases people type words does not appear in the corpora, then the output is
+
+```{r}
+pred("el3vul4",1)
+```
+
+## Test Set
+
+This data set is used to predict, if the output doesn't contain the next word of top ten frequencies 3-grams, then add the line to training set. For example, "I'm afraid I won't be able to come",and "come" doesn't in the output, then we move this sentece to training set.
+
+```{r eval=FALSE}
+pattern=c("one of the","a lot of","to be a","i want to","be able to","out of the",
+  "going to be","some of the","as well as","the fact that")
+for(i in 1:10){
+        output=pred(pattern[i],3)$word
+        index=grep(paste(pattern[i],".",sep=" "),test_data)
+        test_freq_word=test_data[index]
+        add_index=c()
+        for(j in 1:length(index)){
+                word=strsplit(strsplit(test_freq_word[j],paste(pattern[i]," ",sep=""))[[1]][2]," ")[[1]][1]
+                word<-gsub("[^0-9a-z\ ]","",word)
+                if(!word %in% output){
+                        add_index=append(add_index,j)
+                }
+        }
+        train_data=append(train_data,test_freq_word[add_index])
+}
+```
+
+## Validation Set
+
+This data set is used to check the model performance, notice that if the next word in function `pred` output, then we think the prediction is correct.
+
+```{r echo=FALSE}
+train_data=readLines("train_data.txt")
+validation_data=readLines("validation_data.txt")
+```
+
+```{r}
+pattern=c("one of the","a lot of","to be a","i want to","be able to","out of the",
+  "going to be","some of the","as well as","the fact that")
+n=0
+m=c()
+for(i in 1:10){
+        output=pred(pattern[i],3)$word       
+        index=grep(paste(pattern[i],".",sep=" "),validation_data)
+        val_freq_word=validation_data[index]
+        n=n+length(val_freq_word)
+        for(j in 1:length(index)){
+                word=strsplit(strsplit(val_freq_word[j],paste(pattern[i]," ",sep=""))[[1]][2]," ")[[1]][1]
+                word<-gsub("[^0-9a-z\ ]","",word)
+                if(word %in% output){
+                        m=append(m,j)
+                }
+        }
+}
+length(m)/n
+```
+
+# Discussion
+
+We use the function `pred` to build a predictive model, the accuracy is **32%**, it's pretty low, but the model just gives ten possible outcome, we can expect higher accuracy if the model give us more outcome. The method I use is strongly rely on data, it is unable to handle cases where a particular $n$-gram isn't observed, but the adventage is simple and intuitive.
